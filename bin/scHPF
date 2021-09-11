@@ -590,8 +590,7 @@ if __name__=='__main__':
                         if isinstance(k, int):
                             klist = [k]
                             model = [model]
-                            if reject is not None:
-                                reject = [reject]
+
                         else:
                             klist = k
                         for i, (K,m) in enumerate(zip(klist, model)):
