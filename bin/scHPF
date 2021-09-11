@@ -308,18 +308,11 @@ def _parser():
             default=True, help="Don't print intermediate llh.")
 
     ###### train with trials in threadpool
-    multi_train_pool = subparsers.add_parser('multi-train-pool', parents=[train], 
+    multi_train_pool = subparsers.add_parser('multi-train-pool', parents=[multi_train], 
             add_help=False, conflict_handler='resolve')
     multi_train_pool.add_argument('--njobs', type=int, default=0,
             help='Max number of processes to spawn. 0 will use the minimum of'
             ' all available cores and ntrials.')
-    # Required model hyperparameter
-    multi_train.add_argument('--minK', nargs='+', type=int, required=True,
-            help='Minimal number of factors.')
-
-    multi_train.add_argument('--maxK', nargs='+', type=int, required=True,
-        help='Maximal number of factors.')
-
 
 
     ### Score command
