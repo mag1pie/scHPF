@@ -241,10 +241,10 @@ def _parser():
             help='Prefix for output files. Optional.')
 
     # Required model hyperparameter
-    multi_train.add_argument('-k1', '--minK', type=int, required=True,
+    multi_train.add_argument('--minK', type=int, required=True,
             help='Minimal number of factors.')
 
-    multi_train.add_argument('-k2', '--maxK', type=int, required=True,
+    multi_train.add_argument('--maxK', type=int, required=True,
         help='Maximal number of factors.')
         
     # training parameters
@@ -314,10 +314,10 @@ def _parser():
             help='Max number of processes to spawn. 0 will use the minimum of'
             ' all available cores and ntrials.')
     # Required model hyperparameter
-    multi_train.add_argument('-k1', '--minK', nargs='+', type=int, required=True,
+    multi_train.add_argument('--minK', nargs='+', type=int, required=True,
             help='Minimal number of factors.')
 
-    multi_train.add_argument('-k2', '--maxK', nargs='+', type=int, required=True,
+    multi_train.add_argument('--maxK', nargs='+', type=int, required=True,
         help='Maximal number of factors.')
 
 
