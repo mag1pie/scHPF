@@ -243,9 +243,13 @@ def _parser():
     # Required model hyperparameter
     multi_train.add_argument('--minK', type=int, required=True,
             help='Minimal number of factors.')
-
+    
     multi_train.add_argument('--maxK', type=int, required=True,
         help='Maximal number of factors.')
+    
+    multi_train.add_argument('-nm', '--nmodels', type=int, required = True,
+            help='Number of Models to run per K.')    
+
         
     # training parameters
     multi_train.add_argument('-t', '--ntrials',  type=int, default=1,
@@ -563,7 +567,7 @@ if __name__=='__main__':
             if args.ntrials is not None and \
             args.minK is not None and \
             args.maxK is not None and \
-            nmodels is not None:
+            args.nmodels is not None:
 #                 if args.njobs < 0:
             ### TODO: try to pool?
                 for k in range(args.minK,args.maxK+1):
