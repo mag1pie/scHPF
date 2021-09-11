@@ -224,6 +224,103 @@ def _parser():
     train_pool.add_argument('-k', '--nfactors', nargs='+', type=int, 
         required=True, help='Number of factors.')
 
+    ###### Multiple train command
+    multi_train = subparsers.add_parser('multi-train',
+            help='[MC] automated training process through a series of K values')
+    # data and saving
+    multi_train.add_argument('-i', '--input', required=True,
+            help="Training data. Expects either the mtx file output by the "
+            "prep command or a tab-separated tsv file formatted like:" 
+            "`CELL_ID\tGENE_ID\tUMI_COUNT`. In the later case, ids are "
+            "assumed to be 0 indexed and we assume no duplicates."
+            )
+    multi_train.add_argument('-o', '--outdir', 
+            help='Output directory for scHPF model. Will be created if does '
+            'not exist.')
+    multi_train.add_argument('-p', '--prefix', default='',
+            help='Prefix for output files. Optional.')
+
+    # Required model hyperparameter
+    multi_train.add_argument('-k1', '--minK', type=int, required=True,
+            help='Minimal number of factors.')
+
+    multi_train.add_argument('-k2', '--maxK', type=int, required=True,
+        help='Maximal number of factors.')
+        
+    # training parameters
+    multi_train.add_argument('-t', '--ntrials',  type=int, default=1,
+            help='Number of times to run scHPF, selecting the trial with '
+            'best loss (on training data unless validation is given).'
+            ' [Default 1]')
+    multi_train.add_argument('-v', '--validation-cells', default=None,
+            help='Cells to use to assess convergence and choose a model.'
+            ' Expects same format as ``-i/--input``. Training data used by'
+            ' default.'
+            )
+    multi_train.add_argument('-M', '--max-iter', type=int, default=1000,
+            help='Maximum iterations. [Default 1000].')
+    multi_train.add_argument('-m', '--min-iter', type=int, default=30,
+            help='Minimum iterations. [Default 30]')
+    multi_train.add_argument('-e',  '--epsilon', type=float, default=0.001,
+            help='Minimum percent decrease in loss between checks to continue '
+            'inference (convergence criteria). [Default 0.001].')
+    multi_train.add_argument('-f', '--check-freq', type=int, default=10,
+            help='Number of iterations to run between convergence checks. '
+            '[Default 10].')
+    multi_train.add_argument('--better-than-n-ago', default=5, type=int,
+            help= 'Stop condition if loss is getting worse.  Stops training '
+            'if loss is worse than `better_than_n_ago`*`check-freq` training '
+            'steps ago and getting worse. Normally not necessary to change.')
+    multi_train.add_argument('-a', type=float, default=0.3,
+            help='Value for hyperparameter a. Setting to -2 will auto-set to'
+            ' 1/sqrt(nfactors)[Default 0.3]')
+    multi_train.add_argument('-c', type=float, default=0.3,
+            help='Value for hyperparameter c. Setting to -2 will auto-set to'
+            ' 1/sqrt(nfactors)[Default 0.3]')
+    multi_train.add_argument('--float32', action='store_true',
+            help="Use 32-bit floats instead of default 64-bit floats in"
+            " variational distrubtions")
+    multi_train.add_argument('-bs', '--batchsize', default=0, type=int,
+            help="Number of cells to use per training round. All cells used if"
+            " 0. Note that using batches changes the order of updates during"
+            " inference.")
+    multi_train.add_argument('-sl', '--smooth-loss', default=1, type=int,
+            help="Average loss over the last `--smooth-loss` interations."
+            " Intended for when using minibatches, where int(ncells/batchsize)"
+            " is a reasonable value"
+            )
+    multi_train.add_argument('-bts', '--beta-theta-simultaneous', action='store_true',
+            help="If False (default), compute beta update, then compute theta"
+            " based on the updated beta. Note that if batching is used, this"
+            " order is reverse. If True, update both beta and theta based on"
+            " values from the last training round. The later slows the rate of"
+            " convergence and sometimes results in better log-likelihoods, but"
+            " may increase convergence time, especially for large numbers of"
+            " cells."
+            )
+    multi_train.add_argument('-sa', '--save-all', action='store_true',
+            help="Save all trials")
+    multi_train.add_argument('-rp', '--reproject', action='store_true',
+            help="Reproject data onto fixed global (gene) parameters after"
+            " convergence, but before model selection. Recommended with"
+            " batching")
+    multi_train.add_argument('--quiet', dest='verbose', action='store_false', 
+            default=True, help="Don't print intermediate llh.")
+
+    ###### train with trials in threadpool
+    multi_train_pool = subparsers.add_parser('multi-train-pool', parents=[train], 
+            add_help=False, conflict_handler='resolve')
+    multi_train_pool.add_argument('--njobs', type=int, default=0,
+            help='Max number of processes to spawn. 0 will use the minimum of'
+            ' all available cores and ntrials.')
+    # Required model hyperparameter
+    multi_train.add_argument('-k1', '--minK', nargs='+', type=int, required=True,
+            help='Minimal number of factors.')
+
+    multi_train.add_argument('-k2', '--maxK', nargs='+', type=int, required=True,
+        help='Maximal number of factors.')
+
+
 
     ### Score command
     score = subparsers.add_parser('score',
@@ -302,7 +399,7 @@ if __name__=='__main__':
     # setup paths and prefixes
 
     if args.outdir is None:
-        if args.cmd in ['prep', 'prep-like', 'train', 'train-pool']:
+        if args.cmd in ['prep', 'prep-like', 'train', 'train-pool', 'multi-train']:
             args.outdir = args.input.rsplit('/', 1)[0]
         elif args.cmd=='project':
             args.outdir = args.model.rsplit('/',1)[0]
@@ -367,7 +464,7 @@ if __name__=='__main__':
             json.dump(args.__dict__, f, indent=2)
 
 
-    elif args.cmd in ['train', 'train-pool']:
+    elif args.cmd in ['train', 'multi-train', 'train-pool']:
         # load data
         print( 'Loading data.....' )
         load_fnc = mmread if args.input.endswith('.mtx') else load_coo
@@ -403,7 +500,7 @@ if __name__=='__main__':
         dtype = np.float32 if args.float32 else np.float64
         model_kwargs = dict(a=args.a, c=args.c)
 
-        if args.cmd == 'train':
+        if args.cmd in ['train','multi-train']:
             run_fnc = run_trials
         else:
             if args.njobs < 0:
@@ -411,75 +508,130 @@ if __name__=='__main__':
                 raise ValueError(msg.format(args.njobs))
             run_fnc = partial(run_trials_pool, njobs=args.njobs)
 
-        # TODO get rid of repeated code
-        reject = None
-        if args.save_all:
-            model, reject = run_fnc(train, vcells=vcells, 
-                        nfactors=args.nfactors, ntrials=args.ntrials,
-                        min_iter=args.min_iter, max_iter=args.max_iter,
-                        check_freq=args.check_freq, epsilon=args.epsilon,
-                        better_than_n_ago=args.better_than_n_ago, dtype=dtype,
-                        verbose=args.verbose, model_kwargs=model_kwargs,
-                        return_all=True, reproject=args.reproject,
-                        batchsize=args.batchsize,
-                        beta_theta_simultaneous=args.beta_theta_simultaneous,
-                        loss_smoothing=args.smooth_loss
-                        )
-        else:
-            model = run_fnc(train, vcells=vcells, nfactors=args.nfactors, 
-                        ntrials=args.ntrials, min_iter=args.min_iter,
-                        max_iter=args.max_iter, check_freq=args.check_freq,
-                        epsilon=args.epsilon,
-                        better_than_n_ago=args.better_than_n_ago, dtype=dtype,
-                        verbose=args.verbose, model_kwargs=model_kwargs,
-                        return_all=False, reproject=args.reproject,
-                        batchsize=args.batchsize,
-                        beta_theta_simultaneous=args.beta_theta_simultaneous,
-                        loss_smoothing=args.smooth_loss
-                        )
-
-        # save the model/models
-        if isinstance(args.nfactors, int):
-            klist = [args.nfactors]
-            model = [model]
-            if reject is not None:
-                reject = [reject]
-        else:
-            klist = args.nfactors
-        for i, (K,m) in enumerate(zip(klist, model)):
-            model_outprefix = '{}scHPF_K{}{}_{}trials'.format(
-                    outprefix, K, 
-                    f'_b{args.batchsize}' if ncells > args.batchsize else '', 
-                    args.ntrials)
-            if vcells is None:
-                print('Saving best model ({} factors).....'.format(K))
-                joblib.dump(m, model_outprefix + '.joblib')
-            else:
-                print('Saving best model (training data, {} factors).....'\
-                        .format(K))
-                joblib.dump(m, model_outprefix + '.train.joblib')
-
-                print('Computing final validation projection ({} factors)....'\
-                        .format(K))
-                projection = m.project(vcells, replace=False)
-                print('Saving validation projection.....({} factors)'.format(K))
-                joblib.dump(projection, 
-                        model_outprefix + '.validation_proj.joblib')
+        if args.cmd =='train':
+            reject = None
             if args.save_all:
-                for j,r in enumerate(reject[i]):
-                    joblib.dump(r, model_outprefix + f'_reject{j+1}.joblib')
+                model, reject = run_fnc(train, vcells=vcells, 
+                            nfactors=args.nfactors, ntrials=args.ntrials,
+                            min_iter=args.min_iter, max_iter=args.max_iter,
+                            check_freq=args.check_freq, epsilon=args.epsilon,
+                            better_than_n_ago=args.better_than_n_ago, dtype=dtype,
+                            verbose=args.verbose, model_kwargs=model_kwargs,
+                            return_all=True, reproject=args.reproject,
+                            batchsize=args.batchsize,
+                            beta_theta_simultaneous=args.beta_theta_simultaneous,
+                            loss_smoothing=args.smooth_loss
+                            )
+            else:
+                model = run_fnc(train, vcells=vcells, nfactors=args.nfactors, 
+                            ntrials=args.ntrials, min_iter=args.min_iter,
+                            max_iter=args.max_iter, check_freq=args.check_freq,
+                            epsilon=args.epsilon,
+                            better_than_n_ago=args.better_than_n_ago, dtype=dtype,
+                            verbose=args.verbose, model_kwargs=model_kwargs,
+                            return_all=False, reproject=args.reproject,
+                            batchsize=args.batchsize,
+                            beta_theta_simultaneous=args.beta_theta_simultaneous,
+                            loss_smoothing=args.smooth_loss
+                            )
+            # save the model/models
+            if isinstance(args.nfactors, int):
+                klist = [args.nfactors]
+                model = [model]
+                if reject is not None:
+                    reject = [reject]
+            else:
+                klist = args.nfactors
+            for i, (K,m) in enumerate(zip(klist, model)):
+                model_outprefix = '{}scHPF_K{}{}_{}trials'.format(
+                        outprefix, K, 
+                        f'_b{args.batchsize}' if ncells > args.batchsize else '', 
+                        args.ntrials)
+                if vcells is None:
+                    print('Saving best model ({} factors).....'.format(K))
+                    joblib.dump(m, model_outprefix + '.joblib')
+                else:
+                    print('Saving best model (training data, {} factors).....'\
+                            .format(K))
+                    joblib.dump(m, model_outprefix + '.train.joblib')
+
+                    print('Computing final validation projection ({} factors)....'\
+                            .format(K))
+                    projection = m.project(vcells, replace=False)
+                    print('Saving validation projection.....({} factors)'.format(K))
+                    joblib.dump(projection, 
+                            model_outprefix + '.validation_proj.joblib')
+                if args.save_all:
+                    for j,r in enumerate(reject[i]):
+                        joblib.dump(r, model_outprefix + f'_reject{j+1}.joblib')
+
+
+        elif args.cmd =='multi-train':
+            if args.ntrials is not None and \
+            args.minK is not None and \
+            args.maxK is not None and \
+            nmodels is not None:
+#                 if args.njobs < 0:
+            ### TODO: try to pool?
+                for k in range(args.minK,args.maxK+1):
+                    for m in range(args.nmodels):
+                        sub='K'+str(k)+'_'+'n_'+str(m)+'/'
+                        print(sub)
+                        outprefix = args.outdir+sub
+                        model = run_fnc(train, vcells=vcells, nfactors=k, 
+                                    ntrials=args.ntrials, min_iter=args.min_iter,
+                                    max_iter=args.max_iter, check_freq=args.check_freq,
+                                    epsilon=args.epsilon,
+                                    better_than_n_ago=args.better_than_n_ago, dtype=dtype,
+                                    verbose=args.verbose, model_kwargs=model_kwargs,
+                                    return_all=False, reproject=args.reproject,
+                                    batchsize=args.batchsize,
+                                    beta_theta_simultaneous=args.beta_theta_simultaneous,
+                                    loss_smoothing=args.smooth_loss
+                                    )
+                        # save the model/models
+                        if isinstance(k, int):
+                            klist = [k]
+                            model = [model]
+                            if reject is not None:
+                                reject = [reject]
+                        else:
+                            klist = k
+                        for i, (K,m) in enumerate(zip(klist, model)):
+                            model_outprefix = '{}scHPF_K{}{}_{}trials'.format(
+                                    outprefix, K, 
+                                    f'_b{args.batchsize}' if ncells > args.batchsize else '', 
+                                    args.ntrials)
+                            if vcells is None:
+                                print('Saving best model ({} factors).....'.format(K))
+                                joblib.dump(m, model_outprefix + '.joblib')
+                            else:
+                                print('Saving best model (training data, {} factors).....'\
+                                        .format(K))
+                                joblib.dump(m, model_outprefix + '.train.joblib')
+
+                                print('Computing final validation projection ({} factors)....'\
+                                        .format(K))
+                                projection = m.project(vcells, replace=False)
+                                print('Saving validation projection.....({} factors)'.format(K))
+                                joblib.dump(projection, 
+                                        model_outprefix + '.validation_proj.joblib')
+                            if args.save_all:
+                                for j,r in enumerate(reject[i]):
+                                    joblib.dump(r, model_outprefix + f'_reject{j+1}.joblib')
 
 
         print('Writing commandline arguments to file.....')
-        cmdfile = '{}train_commandline_args.json'.format(outprefix)
+        cmdfile = '{}train_commandline_args.json'.format(args.outdir)
         print(cmdfile)
         if os.path.exists(cmdfile):
-            cmdfile = '{}train_commandline_args.{}.json'.format(outprefix, 
+            cmdfile = '{}train_commandline_args.{}.json'.format(args.outdir, 
                     time.strftime("%Y%m%d-%H%M%S"))
         with open(cmdfile, 'w') as f:
             json.dump(args.__dict__, f, indent=2)
 
         print('\n')
+
 
 
     elif args.cmd == 'score':
