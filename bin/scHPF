@@ -577,6 +577,8 @@ if __name__=='__main__':
                         sub='K'+str(k)+'_'+'n_'+str(m)+'/'
                         print(sub)
                         outprefix = args.outdir+sub
+                        if not os.path.exists(OUTDIR):
+                            os.mkdir(outprefix) 
                         model = run_fnc(train, vcells=vcells, nfactors=k, 
                                     ntrials=args.ntrials, min_iter=args.min_iter,
                                     max_iter=args.max_iter, check_freq=args.check_freq,
