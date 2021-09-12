@@ -724,8 +724,9 @@ if __name__=='__main__':
 
         minK = np.min([m.nfactors for m in my_models])
         maxK = np.max([m.nfactors for m in my_models])
-        assert(len(my_models) == (maxK - minK + 1)*N_PER)
         print('n_models:', len(my_models), 'minK:', minK, 'maxK:', maxK, 'n_per', N_PER)
+        assert(len(my_models) == (maxK - minK + 1)*N_PER)
+        
 
         eta_shp, eta_rte, beta_shp, beta_rte = get_spectra(my_models)
         eta_e_x = eta_shp/eta_rte
