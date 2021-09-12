@@ -338,7 +338,9 @@ def _parser():
         help='Maximal number of factors.')
     
     consensus.add_argument('-nm', '--nmodels', type=int, required = True,
-            help='Number of Models to run per K.')    
+            help='Number of Models to run per K.') 
+    consensus.add_argument('-p', '--prefix', default='',
+        help='Prefix for output files. Optional.')
 
         
     # sub parameters
@@ -434,7 +436,7 @@ if __name__=='__main__':
     # setup paths and prefixes
 
     if args.outdir is None:
-        if args.cmd in ['prep', 'prep-like', 'train', 'train-pool', 'multi-train']:
+        if args.cmd in ['prep', 'prep-like', 'train', 'train-pool', 'multi-train', 'consensus']:
             args.outdir = args.input.rsplit('/', 1)[0]
         elif args.cmd=='project':
             args.outdir = args.model.rsplit('/',1)[0]
