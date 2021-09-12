@@ -351,6 +351,12 @@ def _parser():
     consensus = subparsers.add_parser('consensus',
             help='[MC] super consensus')
     # data and saving
+    consensus.add_argument('-i', '--input', required=True,
+        help="Training data. Expects either the mtx file output by the "
+        "prep command or a tab-separated tsv file formatted like:" 
+        "`CELL_ID\tGENE_ID\tUMI_COUNT`. In the later case, ids are "
+        "assumed to be 0 indexed and we assume no duplicates."
+        )
     consensus.add_argument('-o', '--outdir', 
             help='Output directory for scHPF model(s). Will be created if does '
             'not exist.')
@@ -373,7 +379,6 @@ def _parser():
     # sub parameters
     consensus.add_argument('--ngenes', default=1000,
             help='Top n genes with highest coefficient of variation. [Default 1000]')
-    
     consensus.add_argument('-wt', '--weighting_type', default='jaccard',
             help='Walktrap weights, default uses jaccard similarity between adjacent nodes neighbors.')
     consensus.add_argument('-ct', '--cluster_type', default='walktrapP2',
@@ -712,6 +717,11 @@ if __name__=='__main__':
         DENSITY_THRESHOLD = args.density_threshold
         MIN_COMMUNITY_SIZE = args.min_community_size
 
+        # load data
+        print( 'Loading data.....' )
+        load_fnc = mmread if args.input.endswith('.mtx') else load_coo
+        X = load_fnc(args.input)
+        
         if not os.path.exists(OUTDIR):
             os.mkdir(OUTDIR)
         genes = np.loadtxt(GENES, delimiter='\t', dtype=str)
