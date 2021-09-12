@@ -894,10 +894,10 @@ if __name__=='__main__':
 
         # removing small walktrap clusters
         min_cluster_size = max(2,MIN_COMMUNITY_SIZE) #int(local_neighborhood_size * len(my_models))
-        print("Walktrap community size cutoff = "+min_cluster_size)
+        print("Walktrap community size cutoff = "+ str(min_cluster_size))
         print("The smallest community size = "+min(cluster_labels.value_counts()))
         cl_keep = np.where(cluster_labels.value_counts(sort=False) >= min_cluster_size)[0]
-        print("# of communities kept = "+len(cl_keep))
+        print("# of communities kept = "+ str(len(cl_keep)))
         cluster_labels = cluster_labels.loc[cluster_labels.isin(cl_keep)]
         # len(cluster_labels.values)
         cluster_labels.value_counts
