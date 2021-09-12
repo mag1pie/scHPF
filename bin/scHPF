@@ -327,8 +327,8 @@ def _parser():
     consensus.add_argument('-o', '--outdir', 
             help='Output directory for scHPF model(s). Will be created if does '
             'not exist.')
-    consensus.add_argument('--nper', type=int, default=1000,
-            help='Top n models with minimal loss. [Default 1000]')
+    consensus.add_argument('--nper', type=int, default=3,
+            help='Top n models with minimal loss. [Default 3]')
 
     # Required model hyperparameter
     consensus.add_argument('--minK', type=int, required=True,
@@ -344,8 +344,8 @@ def _parser():
 
         
     # sub parameters
-    consensus.add_argument('--ngenes', default=3,
-            help='Top n genes with highest coefficient of variation')
+    consensus.add_argument('--ngenes', default=1000,
+            help='Top n genes with highest coefficient of variation. [Default 1000]')
     
     consensus.add_argument('-wt', '--weighting_type', default='jaccard',
             help='Walktrap weights, default uses jaccard similarity between adjacent nodes neighbors.')
