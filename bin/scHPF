@@ -327,8 +327,8 @@ def _parser():
     consensus.add_argument('-o', '--outdir', 
             help='Output directory for scHPF model(s). Will be created if does '
             'not exist.')
-    consensus.add_argument('--nper', default=3,
-            help='Top n models with minimal loss')
+    consensus.add_argument('--nper', type=int, default=1000,
+            help='Top n models with minimal loss. [Default 1000]')
 
     # Required model hyperparameter
     consensus.add_argument('--minK', type=int, required=True,
