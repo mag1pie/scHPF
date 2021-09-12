@@ -673,7 +673,7 @@ if __name__=='__main__':
     elif args.cmd == 'consensus':
         MODEL_DIR = args.outdir
         N_PER = args.nper
-        NMODELS=arg.nmodels
+        NMODELS=args.nmodels
         OUTDIR = args.outdir+'super_consensus/'
         GENES = args.outdir+'genes.txt'
         minK = args.minK
