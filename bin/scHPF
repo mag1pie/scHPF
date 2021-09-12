@@ -689,7 +689,7 @@ if __name__=='__main__':
             os.mkdir(OUTDIR)
         genes = np.loadtxt(GENES, delimiter='\t', dtype=str)
 
-        MODEL_TEMPLATE = MODEL_DIR+'K[1-9][0-9]_n_*/scHPF*.joblib'
+        MODEL_TEMPLATE = MODEL_DIR+'K[1-9][0-9]_n_[1-9][0-9]/scHPF*.joblib'
         model_files = sorted(glob.glob(MODEL_TEMPLATE))
 
         Ks = [int(m.split('scHPF_K')[1].split('_')[0]) for m in model_files]
