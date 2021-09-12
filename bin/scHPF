@@ -6,6 +6,9 @@ import argparse
 import json
 import time
 from functools import partial
+import yaml
+from copy import deepcopy
+
 
 if not sys.warnoptions:
     import warnings
@@ -36,7 +39,16 @@ from matplotlib import gridspec
 import plotly.express as px
 import plotly.io as pio
 
+from scipy.io import mmread
+import igraph as ig
 
+import scipy.sparse as sp
+from scipy.spatial.distance import squareform
+#from sklearn.decomposition.nmf import non_negative_factorization
+#from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.utils import sparsefuncs
+import sklearn
 
 def _parser():
     # usage = """scHPF <command> [<args>]
