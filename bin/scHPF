@@ -695,8 +695,8 @@ if __name__=='__main__':
         Ks = [int(m.split('scHPF_K')[1].split('_')[0]) for m in model_files]
         models = [joblib.load(m) for m in model_files]
 
-        losses = np.array([m.loss[-1] for m in models]).reshape(len(range(minK,maxK+1)),nmodels)
-        model_files_mtx = np.array([n for n in model_files]).reshape(len(range(minK,maxK+1)),nmodels)
+        losses = np.array([m.loss[-1] for m in models]).reshape(len(range(minK,maxK+1)),NMODELS)
+        model_files_mtx = np.array([n for n in model_files]).reshape(len(range(minK,maxK+1)),NMODELS)
         n_reject = NMODELS - N_PER
         rejected_models = []
         for i in range(model_files_mtx.shape[0]):
