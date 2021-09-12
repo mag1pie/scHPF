@@ -3,10 +3,24 @@
 from collections import namedtuple
 
 import numpy as np
-from scipy.stats import hypergeom
-from scipy.sparse import csr_matrix
 import pandas as pd
+from scipy.io import mmread
+import igraph as ig
 
+import scipy.sparse as sp
+from scipy.spatial.distance import squareform
+#from sklearn.decomposition.nmf import non_negative_factorization
+#from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.utils import sparsefuncs
+import sklearn
+
+from fastcluster import linkage
+from scipy.cluster.hierarchy import leaves_list
+
+import umap
+import loompy
+from tqdm import tqdm
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -18,7 +32,6 @@ from matplotlib import gridspec
 
 import plotly.express as px
 import plotly.io as pio
-
 
 
 def mean_cellscore_fraction(cell_scores, ntop_factors=1):
