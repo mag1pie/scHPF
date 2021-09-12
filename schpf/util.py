@@ -8,6 +8,19 @@ from scipy.sparse import csr_matrix
 import pandas as pd
 
 
+import matplotlib as mpl
+from matplotlib import pyplot as plt
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] =42
+import seaborn as sns
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import gridspec
+
+import plotly.express as px
+import plotly.io as pio
+
+
+
 def mean_cellscore_fraction(cell_scores, ntop_factors=1):
     """ Get number of cells with a percentage of their total scores
     on a small number of factors
