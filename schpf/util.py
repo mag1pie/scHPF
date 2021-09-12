@@ -8,7 +8,7 @@ from scipy.io import mmread
 import igraph as ig
 
 import schpf
-import scipy.sparse as sp, csr_matrix
+from scipy.sparse import csr_matrix
 from scipy.stats import hypergeom
 from scipy.spatial.distance import squareform
 #from sklearn.decomposition.nmf import non_negative_factorization
