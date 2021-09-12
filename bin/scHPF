@@ -734,7 +734,7 @@ if __name__=='__main__':
 
         #spectra = beta_e_x
         spectra = get_genescore_spectra(my_models)
-        gene_ixs = pd.to_numeric(spectra.std()/spectra.mean()).nlargest(N_TOP_GENES).index.values # ordered genes by decreasingcoefficients of variation
+        gene_ixs = (spectra.std()/spectra.mean()).astype(float).nlargest(int(N_TOP_GENES)).index.values # ordered genes by decreasingcoefficients of variation
         #print(len(gene_ixs))
         transformed_spectra = spectra[gene_ixs]
         #transformed_spectra = l2_norm(spectra[gene_ixs])
