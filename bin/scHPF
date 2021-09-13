@@ -9,6 +9,7 @@ from functools import partial
 import yaml
 from copy import deepcopy
 
+import time
 
 if not sys.warnoptions:
     import warnings
@@ -278,7 +279,9 @@ def _parser():
     
     multi_train.add_argument('-nm', '--nmodels', type=int, required = True,
             help='Number of Models to run per K.')    
-
+    multi_train.add_argument('--njobs', type=int, default=0,
+            help='Max number of processes to spawn. 0 will use the minimum of'
+            ' all available cores and ntrials.')
         
     # training parameters
     multi_train.add_argument('-t', '--ntrials',  type=int, default=1,
@@ -579,6 +582,7 @@ if __name__=='__main__':
 
         if args.cmd =='train':
             reject = None
+            start_time = time.time()
             if args.save_all:
                 model, reject = run_fnc(train, vcells=vcells, 
                             nfactors=args.nfactors, ntrials=args.ntrials,
@@ -603,6 +607,7 @@ if __name__=='__main__':
                             beta_theta_simultaneous=args.beta_theta_simultaneous,
                             loss_smoothing=args.smooth_loss
                             )
+            
             # save the model/models
             if isinstance(args.nfactors, int):
                 klist = [args.nfactors]
@@ -633,16 +638,18 @@ if __name__=='__main__':
                 if args.save_all:
                     for j,r in enumerate(reject[i]):
                         joblib.dump(r, model_outprefix + f'_reject{j+1}.joblib')
-
+            duration = (time.time() - start_time) / 60
+            print(f"Duration {duration} minutes. {model_outprefix}")
 
         elif args.cmd =='multi-train':
             if args.ntrials is not None and \
             args.minK is not None and \
             args.maxK is not None and \
             args.nmodels is not None:
-#                 if args.njobs < 0:
-            ### TODO: try to pool?
+                assert(args.njobs >= 0)
+                run_fnc = partial(run_trials_pool, njobs=args.njobs)
                 for k in range(args.minK,args.maxK+1):
+                    start_time = time.time()
                     for m in range(args.nmodels):
                         sub='K'+str(k)+'_'+'n_'+str(m)+'/'
                         print(sub)
@@ -689,6 +696,8 @@ if __name__=='__main__':
                             if args.save_all:
                                 for j,r in enumerate(reject[i]):
                                     joblib.dump(r, model_outprefix + f'_reject{j+1}.joblib')
+                        duration = (time.time() - start_time) / 60
+                        print(f"Duration {duration} minutes. {model_outprefix}")
 
 
         print('Writing commandline arguments to file.....')
