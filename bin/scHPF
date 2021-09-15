@@ -958,7 +958,7 @@ if __name__=='__main__':
         np.random.seed(0)
 
         test_loss_eval = projection_loss_function(
-            mean_negative_pois_llh, X_test, model.nfactors,
+            mean_negative_pois_llh, X, model.nfactors,
             #model_kwargs={'verbose':True},
             proj_kwargs={'reinit':True, 'verbose':False, 'max_iter':100, 'check_freq':10})
 
@@ -979,7 +979,7 @@ if __name__=='__main__':
         MAX_REFIT = 150
 
         test_loss = projection_loss_function(
-            mean_negative_pois_llh, X_test, model.nfactors, 
+            mean_negative_pois_llh, X, model.nfactors, 
             proj_kwargs={'reinit':False, 'verbose':False})
 
         outfile2 = outfile.replace('.joblib', f'.refit_M{MAX_REFIT}.joblib')
