@@ -957,8 +957,8 @@ if __name__=='__main__':
         
         np.random.seed(0)
 
-        test_loss_eval = schpf.loss.projection_loss_function(
-            schpf.loss.mean_negative_pois_llh, X_test, model.nfactors,
+        test_loss_eval = projection_loss_function(
+            mean_negative_pois_llh, X_test, model.nfactors,
             #model_kwargs={'verbose':True},
             proj_kwargs={'reinit':True, 'verbose':False, 'max_iter':100, 'check_freq':10})
 
