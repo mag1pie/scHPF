@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from scipy.io import mmread, mmwrite
 from scipy.sparse import coo_matrix
+from scipy.stats import sem
 import joblib
 import glob
 from schpf import scHPF, run_trials, run_trials_pool
@@ -40,7 +41,6 @@ from matplotlib import gridspec
 import plotly.express as px
 import plotly.io as pio
 
-from scipy.io import mmread
 import igraph as ig
 
 import scipy.sparse as sp
@@ -951,8 +951,49 @@ if __name__=='__main__':
                                    project_kw={'max_iter':MAX_PROJ})
             print(f'Saving to {outfile}')
             joblib.dump(model, outfile)
+            
+        training_loss = [(m.nfactors, m.loss[-1]) for m in models if m.nfactors==model.nfactors]
+        
+        np.random.seed(0)
 
+        test_loss_eval = schpf.loss.projection_loss_function(
+            schpf.loss.mean_negative_pois_llh, X_test, model.nfactors,
+            #model_kwargs={'verbose':True},
+            proj_kwargs={'reinit':True, 'verbose':False, 'max_iter':100, 'check_freq':10})
 
+        orig_test_loss = []
+        for m in models:
+            if m.nfactors==model.nfactors:
+                loss = test_loss_eval(a=m.a, ap=m.ap, bp=m.bp, c=m.c, cp=m.cp, dp=m.dp,
+                                eta=m.eta, beta=m.beta)
+                orig_test_loss.append(loss)
+                print(m.nfactors, loss)
+
+        print('\nMean test loss (random_init):', 
+              np.mean(orig_test_loss), '+/-', np.std(orig_test_loss), sem(orig_test_loss))
+        print( test_loss_eval(a=model.a, ap=model.ap, bp=model.bp, c=model.c, cp=model.cp, dp=model.dp,
+                         eta=model.eta, beta=model.beta)
+             )
+        
+        MAX_REFIT = 150
+
+        test_loss = schpf.loss.projection_loss_function(
+            schpf.loss.mean_negative_pois_llh, X_test, model.nfactors, 
+            proj_kwargs={'reinit':False, 'verbose':False})
+
+        outfile2 = outfile.replace('.joblib', f'.refit_M{MAX_REFIT}.joblib')
+
+        if os.path.exists(outfile2):
+            print(f'Loading from {outfile2}')
+            model2 = joblib.load(outfile2)
+        else:
+            model2 = deepcopy(model)
+            np.random.seed(0)
+            model2.fit(X, loss_function=test_loss, reinit=False, verbose=True, max_iter=MAX_REFIT)
+            print(f'Saving to {outfile2}')
+            joblib.dump(model2, outfile2)
+    
+    
     elif args.cmd == 'score':
         print('Loading model.....')
         model = joblib.load(args.model)
