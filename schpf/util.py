@@ -35,6 +35,7 @@ from matplotlib import gridspec
 import plotly.express as px
 import plotly.io as pio
 
+import time
 
 def mean_cellscore_fraction(cell_scores, ntop_factors=1):
     """ Get number of cells with a percentage of their total scores
@@ -366,6 +367,7 @@ def make_consensus_plot(factor_dists, cluster_labels, local_density, density_thr
 def refit_local_params(X, global_params, nfactors, bp, dp, a=0.3, c=0.3, project_kw={}):
     """
     """
+    start_time = time.time()
     project_defaults = dict(verbose=True, max_iter=50, check_freq=5)
     eta_shp, eta_rte, beta_shp, beta_rte = global_params
     
@@ -380,7 +382,8 @@ def refit_local_params(X, global_params, nfactors, bp, dp, a=0.3, c=0.3, project
             project_kw[k] = v
     loss = model.project(X, replace=True, **project_kw)
     model.loss = loss
-    
+    duration = (time.time() - start_time) / 60
+    print(f"refit_local_params: duration {duration} minutes.")
     return model
 
 
