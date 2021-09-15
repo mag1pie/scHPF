@@ -28,6 +28,7 @@ get_genescore_spectra, get_spectra_order, get_local_density, make_consensus_plot
 refit_local_params, get_ranked_genes
 from schpf.preprocessing import load_coo, load_and_filter, load_like
 from schpf.preprocessing import split_validation_cells
+from schpf.loss import projection_loss_function, mean_negative_pois_llh
 
 import umap
 import matplotlib as mpl
