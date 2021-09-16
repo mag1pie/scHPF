@@ -745,7 +745,7 @@ if __name__=='__main__':
         
         Ks = [int(m.split('scHPF_K')[1].split('_')[0]) for m in model_files]
         models = [joblib.load(m) for m in model_files]
-        models = [m[0] if type(m) is list for m in models]
+        models = [m[0] if type(m) == 'list' for m in models]
         losses = np.array([m.loss[-1] for m in models]).reshape(len(range(minK,maxK+1)),NMODELS)
         
         model_files_mtx = np.array([n for n in model_files]).reshape(len(range(minK,maxK+1)),NMODELS)
