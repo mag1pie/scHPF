@@ -1255,7 +1255,7 @@ def run_trials_pool(X, nfactors,
     # get the loss function for any data
     if loss_function is None:
         loss_function = partial(ls.mean_negative_pois_llh,
-                single_process=True)
+                single_process=False)
 
     # check data we're using for loss
     if vcells is not None:
@@ -1293,7 +1293,7 @@ def run_trials_pool(X, nfactors,
                     )
         # fit the model
         model.fit(X, loss_function=data_loss_function,
-                  checkstep_function=None, single_process=True,
+                  checkstep_function=None, single_process=False,
                   batchsize=batchsize, loss_smoothing=loss_smoothing)
         if reproject:
             # print('Reprojecting data...')
