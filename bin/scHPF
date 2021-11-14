@@ -353,17 +353,27 @@ def _parser():
 
     ###### Super consensus command
     consensus = subparsers.add_parser('consensus',
-            help='[MC] super consensus')
-    # data and saving
+            help='Build a consensus model with an optimal number of factors from a series of models generated from multi-train')
     consensus.add_argument('-i', '--input', required=True,
-        help="Training data. Expects either the mtx file output by the "
-        "prep command or a tab-separated tsv file formatted like:" 
-        "`CELL_ID\tGENE_ID\tUMI_COUNT`. In the later case, ids are "
-        "assumed to be 0 indexed and we assume no duplicates."
+            help="Training data. Expects the mtx file output by the "
+            "prep command.")
+        
+    consensus.add_argument('-g', '--genefile', default=None,
+            help='Create an additional file with gene names ranked by score '
+            'for each factor. Expects the gene.txt file output by the scHPF '
+            'prep command or a similarly formatted tab-delimited file without '
+            'headers. Uses the zero-indexed ``--name_col``\'th column as gene '
+            'names. Optional.')
+    
+    consensus.add_argument('-sfp', '--sample_folder_prefix', default=None,
+        help="The prefix of sample paths; only required when running consensus for a single sample i.e. supercons = False [Default None]."
         )
-    consensus.add_argument('-o', '--outdir', 
-            help='Output directory for scHPF model(s). Will be created if does '
-            'not exist.')
+    consensus.add_argument('-s', '--sample',default=None,
+            help='Individual sample ID; only required when running consensus for a single sample i.e. supercons = False [Default None]')
+    
+    consensus.add_argument('-mf', '--model_files',default=None,
+            help='Paths to the previously generated sample-specific consensus models; only required when running consensus across multiple samples i.e. supercons = True [Default None]')
+
     consensus.add_argument('--nper', type=int, default=3,
             help='Top n models with minimal loss. [Default 3]')
 
@@ -376,9 +386,12 @@ def _parser():
     
     consensus.add_argument('-nm', '--nmodels', type=int, required = True,
             help='Number of Models to run per K.') 
+    
     consensus.add_argument('-p', '--prefix', default='',
         help='Prefix for output files. Optional.')
-
+    
+    consensus.add_argument('-sc', '--supercons', default=False',
+        help='Logical; true if running consensus for a single sample, false if across multiple samples. [Default False]')
         
     # sub parameters
     consensus.add_argument('--ngenes', default=1000,
