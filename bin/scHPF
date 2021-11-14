@@ -725,23 +725,93 @@ if __name__=='__main__':
 
         print('\n')
 
-    elif args.cmd == 'consensus':
-        MODEL_DIR = args.outdir
-        N_PER = args.nper
-        NMODELS=args.nmodels
-        OUTDIR = args.outdir+'super_consensus/'
-        GENES = args.outdir+'genes.txt'
+    elif args.cmd == 'consensus':             
+        matrixfile = args.input
+        genes = args.genefile
+        sample_folder_prefix = args.sample_folder_prefix
+        supercons_outdir = args.supercons_outdir
+        samples = args.samples
+        sample_list = args.sample_list
+        
+        sim = args.sim
+        supercons = args.supercons
         minK = args.minK
         maxK = args.maxK
-        N_TOP_GENES = args.ngenes
-        WEIGHTING_TYPE = args.weighting_type
-        CLUSTER_TYPE = args.cluster_type
-        STEPS = args.steps
-        DENSITY_THRESHOLD = args.density_threshold
-        MIN_COMMUNITY_SIZE = args.min_community_size
+        nmodels = args.nmodels
+        n_per = args.n_per
+        n_top_genes = args.n_top_genes
+        weighting_type = args.weighting_type
+        cluster_type = args.cluster_type
+        steps = args.steps
+        density_threshold = args.density_threshold
+        min_community_size = args.min_community_size
+        max_refit = args.max_refit
+        
 
 
-    
+        sample_cons_outputs = list()
+        for sample in samples:
+            print('Running Consensus for sample: {} ...'.format(sample))
+            sample_folder=sample_folder_prefix+sample
+            my_models=model_selection(sample_folder=sample_folder,
+                                      minK=minK,
+                                      maxK=maxK,
+                                      n_per=n_per,
+                                      nmodels=nmodels,
+                                      supercons = False)
+            sample_cons_output = clustering(my_models=my_models,
+                                            minK=minK,
+                                            maxK=maxK,
+                                            n_top_genes=n_top_genes,
+                                            matrixfile=matrixfile,
+                                            genes=genes,
+                                            sample_folder=sample_folder,
+                                            sim=sim, 
+                                            weighting_type=weighting_type,
+                                            cluster_type=cluster_type, 
+                                            min_community_size=min_community_size,
+                                            sample=sample,
+                                            input_sample_list=sample_list,
+                                            supercons = False)
+            sample_cons_outputs.append(sample_cons_output)
+            
+            print('Writing commandline arguments to file.....')
+            cmdfile = '{}consensus_commandline_args.json'.format(sample_folder+'/consensus/')
+            with open(cmdfile, 'w') as f:
+                json.dump(args.__dict__, f, indent=2)
+            
+            if supercons:
+                print('Running Super consensus across samples ...')
+                my_models,minK,maxK = model_selection(model_files=sample_cons_outputs,
+                                                      minK=None,
+                                                      maxK=None,
+                                                      n_per=n_per,
+                                                      nmodels=nmodels,
+                                                      supercons=True)
+                
+                sample_folder = supercons_outdir
+                sample_cons = clustering(my_models=my_models,
+                                         minK=minK,
+                                         maxK=maxK,
+                                         n_top_genes=n_top_genes,
+                                         matrixfile=matrixfile,
+                                         genes=genes,
+                                         sample_folder=sample_folder, 
+                                         sim=sim,
+                                         weighting_type=weighting_type,
+                                         cluster_type=cluster_type, 
+                                         min_community_size=min_community_size,
+                                         sample=None,
+                                         input_sample_list=None,
+                                         supercons=True)
+                
+                print('Writing commandline arguments to file.....')
+                cmdfile = '{}consensus_commandline_args.json'.format(sample_folder+'/consensus/')
+                with open(cmdfile, 'w') as f:
+                    json.dump(args.__dict__, f, indent=2)
+
+
+
     
     elif args.cmd == 'score':
         print('Loading model.....')
