@@ -380,9 +380,6 @@ def _parser():
     consensus.add_argument('-sl', '--sample_list_dir',default=None,
         help='Path to a list of sample IDs ordered by cells the input matrix [Default None]')
 
-    consensus.add_argument('-mf', '--model_files',default=None,
-            help='Paths to the previously generated sample-specific consensus models; only required when running consensus across multiple samples i.e. supercons = True [Default None]')
-
     consensus.add_argument('--nper', type=int, default=3,
             help='Top n models with minimal loss. [Default 3]')
 
@@ -738,7 +735,6 @@ if __name__=='__main__':
         matrixfile = args.input
         genes = args.genefile
         sample_folder_prefix = args.sample_folder_prefix
-        model_files = args.model_files
         supercons_outdir = args.supercons_outdir
         samples = args.samples
         sample_list_dir = args.sample_list_dir
