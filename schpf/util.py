@@ -9,6 +9,7 @@ from scipy.io import mmread
 import igraph as ig
 
 import schpf
+import scipy.sparse as sp
 from scipy.sparse import csr_matrix, coo_matrix
 from scipy.stats import hypergeom
 from scipy.spatial.distance import squareform
