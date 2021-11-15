@@ -3,6 +3,8 @@
 import os
 import sys
 import argparse
+import ast
+
 import json
 import time
 from functools import partial
@@ -737,7 +739,7 @@ if __name__=='__main__':
         genes = args.genefile
         sample_folder_prefix = args.sample_folder_prefix
         supercons_outdir = args.outdir
-        samples = args.samples
+        samples = ast.literal_eval(args.samples)
         sample_list_dir = args.sample_list_dir
         
         sim = args.sim
