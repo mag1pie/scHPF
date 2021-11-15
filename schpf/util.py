@@ -485,21 +485,21 @@ def model_selection(minK=0,maxK=0,nmodels=10,n_per=3,
 
 
 
-def clustering (my_models,
+def clustering (matrixfile,
+                genes,
+                my_models,
+                sample_folder, 
                 minK=0, 
                 maxK=0,
                 n_top_genes=1000,
-                matrixfile,
-                genes,
-                sample_folder, 
-                sim=False, 
+                min_community_size=2,
+                density_threshold = 2,
                 weighting_type='jaccard2',
                 cluster_type='walktrapP2', 
-                min_community_size=2,
                 sample=None, 
                 input_sample_list = None, 
                 steps=None, 
-                density_threshold = 2,
+                sim=False, 
                 supercons = False):
     
     eta_shp, eta_rte, beta_shp, beta_rte = get_spectra(my_models)
