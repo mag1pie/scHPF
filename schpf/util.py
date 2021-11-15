@@ -575,6 +575,8 @@ def clustering (matrixfile,
     adj_binary = sklearn.neighbors.kneighbors_graph(factor_dists, n_neighbors, 
                                                     metric='precomputed')
     print(adj_binary.shape)
+    print('weighting type is {}'.format(weighting_type))
+    print('cluster type is {}'.format(cluster_type))
 #    if sim:
  #       adj_binary = adj_binary.multiply(adj_binary.T) # adjacency matrix with 2-length paths  (A^2)
 
@@ -592,7 +594,8 @@ def clustering (matrixfile,
         adj = sp.coo_matrix(adj_binary.A * (2-factor_dists))
     else:
         assert False
-
+        
+    print('adj shape is {} using {}'.format(adj.shape,weighting_type))
 
     np.random.seed(0)
     print(sum(sum(adj_binary.A)))
