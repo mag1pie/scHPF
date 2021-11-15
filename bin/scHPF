@@ -810,6 +810,7 @@ if __name__=='__main__':
                                      matrixfile=matrixfile,
                                      genes=genes,
                                      sample_folder=sample_folder, 
+                                     n_per=n_per,
                                      sim=sim,
                                      weighting_type=weighting_type,
                                      cluster_type=cluster_type, 
