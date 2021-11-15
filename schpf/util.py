@@ -596,7 +596,7 @@ def clustering (matrixfile,
     sources, targets = adj.nonzero()
     edgelist = list(zip(sources.tolist(), targets.tolist()))
 
-
+    print(steps)
     if steps is None: 
         steps = 4
         
