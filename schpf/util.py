@@ -491,16 +491,16 @@ def clustering (matrixfile,
                 sample_folder, 
                 minK, 
                 maxK,
+                sample, 
+                supercons,
+                input_sample_list, 
+                density_threshold,
                 n_top_genes=1000,
                 min_community_size=2,
-                density_threshold,
                 weighting_type='jaccard2',
                 cluster_type='walktrapP2', 
-                sample, 
-                input_sample_list, 
                 steps=4, 
-                sim=False, 
-                supercons):
+                sim=False):
     
     eta_shp, eta_rte, beta_shp, beta_rte = get_spectra(my_models)
     eta_e_x = eta_shp/eta_rte
