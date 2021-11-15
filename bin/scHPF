@@ -354,10 +354,11 @@ def _parser():
     ###### Super consensus command
     consensus = subparsers.add_parser('consensus',
             help='Build a consensus model with an optimal number of factors from a series of models generated from multi-train')
+    
     consensus.add_argument('-i', '--input', required=True,
             help="Training data. Expects the mtx file output by the "
             "prep command.")
-        
+    
     consensus.add_argument('-g', '--genefile', default=None,
             help='Create an additional file with gene names ranked by score '
             'for each factor. Expects the gene.txt file output by the scHPF '
@@ -368,16 +369,23 @@ def _parser():
     consensus.add_argument('-sfp', '--sample_folder_prefix', default=None,
         help="The prefix of sample paths; only required when running consensus for a single sample i.e. supercons = False [Default None]."
         )
-    consensus.add_argument('-s', '--sample',default=None,
-            help='Individual sample ID; only required when running consensus for a single sample i.e. supercons = False [Default None]')
+
+    consensus.add_argument('-so', '--supercons_outdir', default=None,
+    help="The path where a super consensus/ folder would be created; only required when supercons = True [Default None]."
+    )
+
+    consensus.add_argument('-s', '--samples',default=None,
+            help='List of unique sample IDs included; required when running sample-specific consensus model(s) [Default None]')
     
+    consensus.add_argument('-sl', '--sample_list_dir',default=None,
+        help='Path to a list of sample IDs ordered by cells the input matrix [Default None]')
+
     consensus.add_argument('-mf', '--model_files',default=None,
             help='Paths to the previously generated sample-specific consensus models; only required when running consensus across multiple samples i.e. supercons = True [Default None]')
 
     consensus.add_argument('--nper', type=int, default=3,
             help='Top n models with minimal loss. [Default 3]')
 
-    # Required model hyperparameter
     consensus.add_argument('--minK', type=int, required=True,
             help='Minimal number of factors.')
     
@@ -385,16 +393,15 @@ def _parser():
         help='Maximal number of factors.')
     
     consensus.add_argument('-nm', '--nmodels', type=int, required = True,
-            help='Number of Models to run per K.') 
+            help='Number of models to run per K.') 
     
-    consensus.add_argument('-p', '--prefix', default='',
-        help='Prefix for output files. Optional.')
+    consensus.add_argument('-sc', '--supercons', default=False,
+        help='Logical; false if running consensus for a single sample, true if across multiple samples. [Default False]')
     
-    consensus.add_argument('-sc', '--supercons', default=False',
-        help='Logical; true if running consensus for a single sample, false if across multiple samples. [Default False]')
+    consensus.add_argument('--sim', default=False,
+        help='Logical; false if clustering on A (path length = 1); true if clustering on A^2 (path length = 2). [Default False]')
         
-    # sub parameters
-    consensus.add_argument('--ngenes', default=1000,
+    consensus.add_argument('--n_top_genes', default=1000,
             help='Top n genes with highest coefficient of variation. [Default 1000]')
     consensus.add_argument('-wt', '--weighting_type', default='jaccard',
             help='Walktrap weights, default uses jaccard similarity between adjacent nodes neighbors.')
@@ -407,7 +414,9 @@ def _parser():
     consensus.add_argument('-mcs', '--min_community_size', type=int, default=2,
             help='Number of clusters per minimal walktrap community '
             '[Default 2].')
- 
+    consensus.add_argument('--max_refit', type=int, default=150,
+        help='Max refit trials. [Default 150]')
+
     ### Score command
     score = subparsers.add_parser('score',
             help='Create useful files such as gene scores, cell scores, and'
@@ -729,16 +738,17 @@ if __name__=='__main__':
         matrixfile = args.input
         genes = args.genefile
         sample_folder_prefix = args.sample_folder_prefix
+        model_files = args.model_files
         supercons_outdir = args.supercons_outdir
         samples = args.samples
-        sample_list = args.sample_list
+        sample_list_dir = args.sample_list_dir
         
         sim = args.sim
         supercons = args.supercons
         minK = args.minK
         maxK = args.maxK
         nmodels = args.nmodels
-        n_per = args.n_per
+        n_per = args.nper
         n_top_genes = args.n_top_genes
         weighting_type = args.weighting_type
         cluster_type = args.cluster_type
@@ -747,7 +757,8 @@ if __name__=='__main__':
         min_community_size = args.min_community_size
         max_refit = args.max_refit
         
-
+        if sample_list_dir is not None:
+            sample_list = np.loadtxt(sample_list_dir, delimiter='\t', dtype=object)
 
         sample_cons_outputs = list()
         for sample in samples:
@@ -780,35 +791,35 @@ if __name__=='__main__':
             with open(cmdfile, 'w') as f:
                 json.dump(args.__dict__, f, indent=2)
             
-            if supercons:
-                print('Running Super consensus across samples ...')
-                my_models,minK,maxK = model_selection(model_files=sample_cons_outputs,
-                                                      minK=None,
-                                                      maxK=None,
-                                                      n_per=n_per,
-                                                      nmodels=nmodels,
-                                                      supercons=True)
-                
-                sample_folder = supercons_outdir
-                sample_cons = clustering(my_models=my_models,
-                                         minK=minK,
-                                         maxK=maxK,
-                                         n_top_genes=n_top_genes,
-                                         matrixfile=matrixfile,
-                                         genes=genes,
-                                         sample_folder=sample_folder, 
-                                         sim=sim,
-                                         weighting_type=weighting_type,
-                                         cluster_type=cluster_type, 
-                                         min_community_size=min_community_size,
-                                         sample=None,
-                                         input_sample_list=None,
-                                         supercons=True)
-                
-                print('Writing commandline arguments to file.....')
-                cmdfile = '{}consensus_commandline_args.json'.format(sample_folder+'/consensus/')
-                with open(cmdfile, 'w') as f:
-                    json.dump(args.__dict__, f, indent=2)
+        if supercons:
+            print('Running Super consensus across samples ...')
+            my_models,minK,maxK = model_selection(model_files=sample_cons_outputs,
+                                                  minK=None,
+                                                  maxK=None,
+                                                  n_per=n_per,
+                                                  nmodels=nmodels,
+                                                  supercons=True)
+
+            sample_folder = supercons_outdir
+            sample_cons = clustering(my_models=my_models,
+                                     minK=minK,
+                                     maxK=maxK,
+                                     n_top_genes=n_top_genes,
+                                     matrixfile=matrixfile,
+                                     genes=genes,
+                                     sample_folder=sample_folder, 
+                                     sim=sim,
+                                     weighting_type=weighting_type,
+                                     cluster_type=cluster_type, 
+                                     min_community_size=min_community_size,
+                                     sample=None,
+                                     input_sample_list=None,
+                                     supercons=True)
+
+            print('Writing commandline arguments to file.....')
+            cmdfile = '{}consensus_commandline_args.json'.format(sample_folder+'/consensus/')
+            with open(cmdfile, 'w') as f:
+                json.dump(args.__dict__, f, indent=2)
 
 
 
