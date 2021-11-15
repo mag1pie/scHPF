@@ -610,6 +610,7 @@ def clustering (matrixfile,
 
     if cluster_type.startswith('walktrap'):
         knn = ig.Graph(edges=edgelist, directed=False)
+        print("Number of vertices pre walktrap:", knn.vcount())
         knn.vs['label'] = transformed_spectra.index
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
