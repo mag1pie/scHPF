@@ -819,7 +819,7 @@ if __name__=='__main__':
                                      min_community_size=min_community_size,
                                      max_refit=max_refit,
                                      sample=None,
-                                     input_sample_list=None,
+                                     input_sample_list=sample_list,
                                      supercons=True)
 
             print('Writing commandline arguments to file.....')
