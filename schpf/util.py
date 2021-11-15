@@ -589,8 +589,8 @@ def clustering (matrixfile,
 
 
     np.random.seed(0)
-    print(sum(sum(adj_binary.A))
-    print(sum(sum(adj.A))
+    print(sum(sum(adj_binary.A)))
+    print(sum(sum(adj.A)))
     vcount = max(adj.shape)
     sources, targets = adj.nonzero()
     edgelist = list(zip(sources.tolist(), targets.tolist()))
