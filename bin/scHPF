@@ -378,7 +378,7 @@ def _parser():
     consensus.add_argument('-p', '--prefix', default='',
                       help='Prefix for output files. Optional.')
     
-    consensus.add_argument('-s', '--samples',  type=str, default='',
+    consensus.add_argument('-s', '--samples', nargs="*", type=str, default='',
             help='String of a list of unique sample IDs included; required when running sample-specific consensus model(s)')
     
     consensus.add_argument('-sl', '--sample_list_dir',default=None,
