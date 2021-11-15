@@ -481,7 +481,6 @@ def model_selection(minK=0,maxK=0,nmodels=10,n_per=3,
         minK = np.min([m.nfactors for m in my_models])
         maxK = np.max([m.nfactors for m in my_models])
         print('n_models:', len(my_models),'minK:', minK, 'maxK:', maxK, 'n_per:', n_per)
-        [print(x) for x in my_models]
         return my_models
 
 
@@ -490,18 +489,18 @@ def clustering (matrixfile,
                 genes,
                 my_models,
                 sample_folder, 
-                minK=0, 
-                maxK=0,
+                minK, 
+                maxK,
                 n_top_genes=1000,
                 min_community_size=2,
-                density_threshold = 2,
+                density_threshold,
                 weighting_type='jaccard2',
                 cluster_type='walktrapP2', 
-                sample=None, 
-                input_sample_list = None, 
+                sample, 
+                input_sample_list, 
                 steps=4, 
                 sim=False, 
-                supercons = False):
+                supercons):
     
     eta_shp, eta_rte, beta_shp, beta_rte = get_spectra(my_models)
     eta_e_x = eta_shp/eta_rte
@@ -608,6 +607,9 @@ def clustering (matrixfile,
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
         cluster_result = knn.community_walktrap(weights=adj.data, steps=steps)
+        print("Number of vertices:", knn.vcount())
+        print("Number of edges:", knn.ecount())
+        print("Density of the graph:", 2*knn.ecount()/(knn.vcount()*(knn.vcount()-1)))
 
         if cluster_type == 'walktrapP1':
             nclusters = cluster_result.optimal_count + 1
