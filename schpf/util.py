@@ -632,7 +632,7 @@ def clustering (matrixfile,
     optimal_count = cluster_result.optimal_count 
 
     x = np.arange(-(optimal_count-5),optimal_count+20)
-    modularity = [cluster_result.as_clustering(optimal_count + i).modularity for i in x]
+    modularity = [cluster_result.as_clustering(max(optimal_count + i,10)).modularity for i in x]
 
     plt.plot(x + optimal_count, modularity)
     plt.axvline(nclusters, c='r')
