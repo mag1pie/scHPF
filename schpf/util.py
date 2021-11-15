@@ -634,7 +634,7 @@ def clustering (matrixfile,
     plt.ylabel('modularity')
     plt.xlabel('number of clusters')
 
-    outfile = f'{cluster_type}/supercons_min{minK}max{maxK}_n{n_per}' \
+    outfile = f'{outdir}/supercons_min{minK}max{maxK}_n{n_per}' \
         + f'.cv{n_top_genes}_k{n_neighbors}_{"sim_" if sim else ""}{weighting_type}_{cluster_type}' \
         + f'{f"_s{steps}" if steps!=4 else ""}' \
         + f'.modularity_peak.pdf'
