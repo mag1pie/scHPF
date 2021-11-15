@@ -506,7 +506,7 @@ def clustering (matrixfile,
                 cluster_type='walktrapP2', 
                 steps=4, 
                 sim=False):
-    
+    print('QC for gene selection')
     eta_shp, eta_rte, beta_shp, beta_rte = get_spectra(my_models)
     eta_e_x = eta_shp/eta_rte
     beta_e_x = beta_shp/beta_rte
@@ -552,8 +552,9 @@ def clustering (matrixfile,
         plt.semilogx()
         pdf.savefig(bbox_inches = 'tight')
     plt.close('all')   
+    print('QC figs saved under: {}QC_*.pdf'.format(outdir))
 
-
+    print('Building a KNN graph')
     transformed_spectra = spectra[gene_ixs]
     factor_dists = 1 - pd.DataFrame(transformed_spectra, index=transformed_spectra.index).T.corr().values
 
@@ -561,7 +562,6 @@ def clustering (matrixfile,
     n_neighbors = max(5, int(local_neighborhood_size * len(my_models)))
     local_density = get_local_density(factor_dists, n_neighbors, transformed_spectra.index)
     print(f'{n_neighbors}/{transformed_spectra.shape[0]}')
-
 
     with PdfPages(outdir+'KNN_'+str(n_neighbors)+'.Factor_Distance.pdf') as pdf:
 
@@ -574,11 +574,6 @@ def clustering (matrixfile,
 
     adj_binary = sklearn.neighbors.kneighbors_graph(factor_dists, n_neighbors, 
                                                     metric='precomputed')
-    print(adj_binary.shape)
-    print('weighting type is {}'.format(weighting_type))
-    print('cluster type is {}'.format(cluster_type))
-#    if sim:
- #       adj_binary = adj_binary.multiply(adj_binary.T) # adjacency matrix with 2-length paths  (A^2)
 
     if weighting_type in ['jaccard','jaccard2']:
         adj = np.zeros(adj_binary.shape)
@@ -595,11 +590,7 @@ def clustering (matrixfile,
     else:
         assert False
         
-    print('adj shape is {} using {}'.format(adj.shape,weighting_type))
-
     np.random.seed(0)
-    print(sum(sum(adj_binary.A)))
-    print(sum(sum(adj.A)))
     vcount = max(adj.shape)
     sources, targets = adj.nonzero()
     edgelist = list(zip(sources.tolist(), targets.tolist()))
@@ -607,13 +598,12 @@ def clustering (matrixfile,
     if density_threshold is None: 
         density_threshold = 2
 
-
     if cluster_type is None:
         cluster_type = 'walktrapP2'
-
+        
+    print('Clustering the KNN graph using {}'.format(cluster_type))
     if cluster_type.startswith('walktrap'):
         knn = ig.Graph(edges=edgelist, directed=False)
-        print("Number of vertices pre walktrap:", knn.vcount())
         knn.vs['label'] = transformed_spectra.index
         diconnected_vertices=[ind for ind in transformed_spectra.index if ind not in knn.vs['label']]
         knn.add_vertices(diconnected_vertices)        
@@ -621,9 +611,9 @@ def clustering (matrixfile,
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
         cluster_result = knn.community_walktrap(weights=adj.data, steps=steps)
-        print("Number of vertices:", knn.vcount())
-        print("Number of edges:", knn.ecount())
-        print("Density of the graph:", 2*knn.ecount()/(knn.vcount()*(knn.vcount()-1)))
+        print("KNN: number of vertices:", knn.vcount())
+        print("KNN: number of edges:", knn.ecount())
+        print("KNN: density of the graph:", 2*knn.ecount()/(knn.vcount()*(knn.vcount()-1)))
 
         if cluster_type == 'walktrapP1':
             nclusters = cluster_result.optimal_count + 1
@@ -652,7 +642,8 @@ def clustering (matrixfile,
         + f'.modularity_peak.pdf'
     print(outfile)
     plt.savefig(outfile, bbox_inches='tight', transparent=True)
-
+    
+    
     eta_shp_med = eta_shp.median().values # vector of length total ngenes
     eta_rte_med = eta_rte.median().values
     beta_shp_med = beta_shp.groupby(cluster_labels).median() # n of walktrap clusters * total ngenes
@@ -664,7 +655,8 @@ def clustering (matrixfile,
     outfile = outfile.replace('modularity_peak', 'clustergram')
     res = make_consensus_plot(factor_dists, cluster_labels, local_density, density_threshold=density_threshold)
     res[0].savefig(outfile, bbox_inches='tight', transparent=True)
-
+    
+    print('Visualizations of clustering are stored in: '.format(outdir))
 
 
     # removing small walktrap clusters
@@ -679,19 +671,14 @@ def clustering (matrixfile,
     if supercons: 
         print('super consensus across samples')
         selected=np.where(np.isin(input_sample_list, list(set(input_sample_list)), invert=False))[0]
-        X_sub = X.copy()
-        dense = X_sub.tocsr()[selected,:].todense()
-        X_sub = coo_matrix(dense, shape=dense.shape, dtype=np.float64)
-        X = X_sub
-        del X_sub
     else:
         print('consensus on sample: '+str(sample))
         selected=np.where(np.isin(input_sample_list, sample, invert=False))[0]
-        X_sub = X.copy()
-        dense = X_sub.tocsr()[selected,:].todense()
-        X_sub = coo_matrix(dense, shape=dense.shape, dtype=np.float64)
-        X = X_sub
-        del X_sub
+    X_sub = X.copy()
+    dense = X_sub.tocsr()[selected,:].todense()
+    X_sub = coo_matrix(dense, shape=dense.shape, dtype=np.float64)
+    X = X_sub
+    del X_sub
             
     MAX_PROJ = 1 
 
