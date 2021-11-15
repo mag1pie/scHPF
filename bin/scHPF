@@ -370,7 +370,7 @@ def _parser():
         help="The prefix of sample paths; only required when running consensus for a single sample i.e. supercons = False [Default None]."
         )
 
-    consensus.add_argument('-so', '--supercons_outdir', default=None,
+    consensus.add_argument('-o', '--outdir', default=None,
     help="The path where a super consensus/ folder would be created; only required when supercons = True [Default None]."
     )
 
@@ -735,7 +735,7 @@ if __name__=='__main__':
         matrixfile = args.input
         genes = args.genefile
         sample_folder_prefix = args.sample_folder_prefix
-        supercons_outdir = args.supercons_outdir
+        supercons_outdir = args.outdir
         samples = args.samples
         sample_list_dir = args.sample_list_dir
         
