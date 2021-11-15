@@ -741,6 +741,7 @@ if __name__=='__main__':
         sample_folder_prefix = args.sample_folder_prefix
         supercons_outdir = args.outdir
         samples = ast.literal_eval(args.samples)
+        print('samples of interest: {}'.format(samples))
         sample_list_dir = args.sample_list_dir
         
         sim = args.sim
