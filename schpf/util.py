@@ -603,7 +603,7 @@ def clustering (matrixfile,
     vcount = max(adj.shape)
     sources, targets = adj.nonzero()
     edgelist = list(zip(sources.tolist(), targets.tolist()))
-        
+    
     if density_threshold is None: 
         density_threshold = 2
 
@@ -615,6 +615,8 @@ def clustering (matrixfile,
         knn = ig.Graph(edges=edgelist, directed=False)
         print("Number of vertices pre walktrap:", knn.vcount())
         knn.vs['label'] = transformed_spectra.index
+        print([ind for ind in transformed_spectra.index if ind not in knn.vs['label']])
+         
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
         cluster_result = knn.community_walktrap(weights=adj.data, steps=steps)
