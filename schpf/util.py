@@ -670,8 +670,12 @@ def clustering (matrixfile,
     X = mmread(source=matrixfile)
     if supercons: 
         print('super consensus across samples')
-        dense = X.tocsr()[:,:].todense()
-        X = coo_matrix(dense, shape=dense.shape, dtype=np.float64)
+        selected=np.where(np.isin(input_sample_list, list(set(input_sample_list)), invert=False))[0]
+        X_sub = X.copy()
+        dense = X_sub.tocsr()[selected,:].todense()
+        X_sub = coo_matrix(dense, shape=dense.shape, dtype=np.float64)
+        X = X_sub
+        del X_sub
     else:
         print('consensus on sample: '+str(sample))
         selected=np.where(np.isin(input_sample_list, sample, invert=False))[0]
