@@ -495,6 +495,7 @@ def clustering (matrixfile,
                 supercons,
                 input_sample_list, 
                 n_per,
+                max_refit,
                 density_threshold=2,
                 n_top_genes=1000,
                 min_community_size=2,
@@ -708,7 +709,7 @@ def clustering (matrixfile,
         joblib.dump(model, outfile)
 
     
-    outfile2 = outfile.replace('.joblib', f'.refit_M{MAX_REFIT}.joblib')
+    outfile2 = outfile.replace('.joblib', f'.refit_M{max_refit}.joblib')
     if os.path.exists(outfile2):
         print(f'Loading from {outfile2}')
         model2 = joblib.load(outfile2)
@@ -719,7 +720,7 @@ def clustering (matrixfile,
         
         model2 = deepcopy(model)
         np.random.seed(0)
-        model2.fit(X, loss_function=test_loss, reinit=False, verbose=True, max_iter=MAX_REFIT)
+        model2.fit(X, loss_function=test_loss, reinit=False, verbose=True, max_iter=max_refit)
         print(f'Saving to {outfile2}')
         joblib.dump(model2, outfile2)
         
