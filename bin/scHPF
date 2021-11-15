@@ -377,8 +377,9 @@ def _parser():
     )
     consensus.add_argument('-p', '--prefix', default='',
                       help='Prefix for output files. Optional.')
-    consensus.add_argument('-s', '--samples',default=None,
-            help='List of unique sample IDs included; required when running sample-specific consensus model(s) [Default None]')
+    
+    consensus.add_argument('-s', '--samples',  type=str, default='',
+            help='String of a list of unique sample IDs included; required when running sample-specific consensus model(s)')
     
     consensus.add_argument('-sl', '--sample_list_dir',default=None,
         help='Path to a list of sample IDs ordered by cells the input matrix [Default None]')
