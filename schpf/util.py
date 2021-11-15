@@ -44,6 +44,9 @@ import time
 import itertools
 import joblib
 import glob
+from copy import deepcopy
+
+
 
 def mean_cellscore_fraction(cell_scores, ntop_factors=1):
     """ Get number of cells with a percentage of their total scores
