@@ -404,8 +404,6 @@ def get_ranked_genes(model, genes):
     ranked_genes = pd.DataFrame(np.stack(ranked_genes).T)
     return ranked_genes
 
-
-
 def model_selection(minK=0,maxK=0,nmodels=10,n_per=3,
                     sample_folder=None, model_files=None,supercons=False):
     if supercons and model_files is not None:
@@ -609,7 +607,7 @@ def clustering (matrixfile,
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
         cluster_result = knn.community_walktrap(weights=adj.data, steps=steps)
-
+        print(cluster_result)
         if cluster_type == 'walktrapP1':
             nclusters = cluster_result.optimal_count + 1
         elif cluster_type == 'walktrapP2':
