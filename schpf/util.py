@@ -612,7 +612,7 @@ def clustering (matrixfile,
         knn.vs['label'] = transformed_spectra.index
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
-        cluster_result = knn.community_walktrap(weights=adj.data, steps=STEPS)
+        cluster_result = knn.community_walktrap(weights=adj.data, steps=steps)
 
         if cluster_type == 'walktrapP1':
             nclusters = cluster_result.optimal_count + 1
