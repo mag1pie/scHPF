@@ -481,6 +481,7 @@ def model_selection(minK=0,maxK=0,nmodels=10,n_per=3,
         minK = np.min([m.nfactors for m in my_models])
         maxK = np.max([m.nfactors for m in my_models])
         print('n_models:', len(my_models),'minK:', minK, 'maxK:', maxK, 'n_per:', n_per)
+        [print(x) for x in my_models]
         return my_models
 
 
@@ -607,7 +608,7 @@ def clustering (matrixfile,
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
         cluster_result = knn.community_walktrap(weights=adj.data, steps=steps)
-        print(cluster_result)
+
         if cluster_type == 'walktrapP1':
             nclusters = cluster_result.optimal_count + 1
         elif cluster_type == 'walktrapP2':
