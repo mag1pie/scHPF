@@ -755,7 +755,6 @@ if __name__=='__main__':
         weighting_type = args.weighting_type
         cluster_type = args.cluster_type
         steps = np.int(args.steps)
-        print(steps)
         density_threshold = np.float32(args.density_threshold)
         min_community_size = np.int(args.min_community_size)
         max_refit = np.int(args.max_refit)
