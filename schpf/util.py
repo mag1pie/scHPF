@@ -500,7 +500,7 @@ def clustering (matrixfile,
                 cluster_type='walktrapP2', 
                 sample=None, 
                 input_sample_list = None, 
-                steps=None, 
+                steps=4, 
                 sim=False, 
                 supercons = False):
     
@@ -595,10 +595,6 @@ def clustering (matrixfile,
     vcount = max(adj.shape)
     sources, targets = adj.nonzero()
     edgelist = list(zip(sources.tolist(), targets.tolist()))
-
-    print(steps)
-    if steps is None: 
-        steps = 4
         
     if density_threshold is None: 
         density_threshold = 2
