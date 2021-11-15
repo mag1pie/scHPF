@@ -569,8 +569,8 @@ def clustering (matrixfile,
 
     adj_binary = sklearn.neighbors.kneighbors_graph(factor_dists, n_neighbors, 
                                                     metric='precomputed')
-    if sim:
-        adj_binary = adj_binary.multiply(adj_binary.T) # adjacency matrix with 2-length paths  (A^2)
+#    if sim:
+ #       adj_binary = adj_binary.multiply(adj_binary.T) # adjacency matrix with 2-length paths  (A^2)
 
     if weighting_type in ['jaccard','jaccard2']:
         adj = np.zeros(adj_binary.shape)
