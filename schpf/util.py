@@ -615,7 +615,8 @@ def clustering (matrixfile,
         knn = ig.Graph(edges=edgelist, directed=False)
         print("Number of vertices pre walktrap:", knn.vcount())
         knn.vs['label'] = transformed_spectra.index
-        print([ind for ind in transformed_spectra.index if ind not in knn.vs['label']])
+        diconnected_vertices=[ind for ind in transformed_spectra.index if ind not in knn.vs['label']]
+        knn.add_vertices(diconnected_vertices)        
          
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
