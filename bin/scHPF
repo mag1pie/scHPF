@@ -373,7 +373,8 @@ def _parser():
     consensus.add_argument('-o', '--outdir', default=None,
     help="The path where a super consensus/ folder would be created; only required when supercons = True [Default None]."
     )
-
+    consensus.add_argument('-p', '--prefix', default='',
+                      help='Prefix for output files. Optional.')
     consensus.add_argument('-s', '--samples',nargs="*",default=[],
             help='List of unique sample IDs included; required when running sample-specific consensus model(s) [Default None]')
     
