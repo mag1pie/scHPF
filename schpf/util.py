@@ -671,7 +671,6 @@ def clustering (matrixfile,
     cluster_labels = cluster_labels.loc[cluster_labels.isin(cl_keep)]
 
     X = mmread(source=matrixfile)
-    sample = str(sample)
     input_sample_list = [str(s) for s in input_sample_list]    
     if supercons and type(sample) is list: 
         print('super consensus across samples')
