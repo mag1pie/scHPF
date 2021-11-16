@@ -673,9 +673,9 @@ def clustering (matrixfile,
     X = mmread(source=matrixfile)
     sample = str(sample)
     input_sample_list = [str(s) for s in input_sample_list]    
-    if supercons: 
+    if supercons and type(sample) is list: 
         print('super consensus across samples')
-        selected=np.where(np.isin(input_sample_list, list(set(input_sample_list)), invert=False))[0]
+        selected=np.where(np.isin(input_sample_list, list(set(sample)), invert=False))[0]
     else:
         print('consensus on sample: '+str(sample))
         selected=np.where(np.isin(input_sample_list, sample, invert=False))[0]
