@@ -499,13 +499,16 @@ def clustering (matrixfile,
                 input_sample_list, 
                 n_per,
                 max_refit,
+                sim,
                 density_threshold=2,
                 n_top_genes=1000,
                 min_community_size=2,
                 weighting_type='jaccard2',
                 cluster_type='walktrapP2', 
-                steps=4, 
-                sim=False):
+                steps=4):
+    
+    sim = False # for now
+    
     print('QC for gene selection')
     eta_shp, eta_rte, beta_shp, beta_rte = get_spectra(my_models)
     eta_e_x = eta_shp/eta_rte
@@ -668,6 +671,8 @@ def clustering (matrixfile,
     cluster_labels = cluster_labels.loc[cluster_labels.isin(cl_keep)]
 
     X = mmread(source=matrixfile)
+    sample = str(sample)
+    input_sample_list = [str(s) for s in input_sample_list]    
     if supercons: 
         print('super consensus across samples')
         selected=np.where(np.isin(input_sample_list, list(set(input_sample_list)), invert=False))[0]
@@ -676,12 +681,11 @@ def clustering (matrixfile,
         selected=np.where(np.isin(input_sample_list, sample, invert=False))[0]
     X_sub = X.copy()
     dense = X_sub.tocsr()[selected,:].todense()
-    X_sub = coo_matrix(dense, shape=dense.shape, dtype=np.float64)
-    X = X_sub
-    del X_sub
+    del X, X_sub
+    X = coo_matrix(dense, shape=dense.shape, dtype=np.float64)
+    print(X.shape)
             
     MAX_PROJ = 1 
-
     outfile = f'{outdir}/supercons_min{minK}max{maxK}_n{n_per}' \
         + f'.cv{n_top_genes}_k{n_neighbors}_{"sim_" if sim else ""}{weighting_type}_{cluster_type}' \
         + f'{f"_s{steps}" if steps!=4 else ""}' \
