@@ -608,12 +608,15 @@ def clustering (matrixfile,
     if cluster_type.startswith('walktrap'):
         knn = ig.Graph(edges=edgelist, directed=False)
         knn.vs['label'] = transformed_spectra.index
-        diconnected_vertices=[ind for ind in transformed_spectra.index if ind not in knn.vs['label']]
-        knn.add_vertices(diconnected_vertices)        
+        disconnected_vertices=[ind for ind in transformed_spectra.index if ind not in knn.vs['label']]
+        knn.add_vertices(disconnected_vertices)        
          
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
-        cluster_result = knn.community_walktrap(weights=adj.data, steps=steps)
+        
+        knn = knn.clusters().giant()
+       
+        cluster_result = knn.community_walktrap(weights=knn.es['width'], steps=steps)
         print("KNN: number of vertices:", knn.vcount())
         print("KNN: number of edges:", knn.ecount())
         print("KNN: density of the graph:", 2*knn.ecount()/(knn.vcount()*(knn.vcount()-1)))
