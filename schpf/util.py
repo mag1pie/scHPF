@@ -614,7 +614,8 @@ def clustering (matrixfile,
         knn.es['width'] = adj.data
         knn.es['weight'] = adj.data
         
-        knn = knn.clusters().giant()
+        if supercons:
+            knn = knn.clusters().giant()
        
         cluster_result = knn.community_walktrap(weights=knn.es['width'], steps=steps)
         print("KNN: number of vertices:", knn.vcount())
