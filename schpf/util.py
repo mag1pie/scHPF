@@ -630,7 +630,7 @@ def clustering (matrixfile,
             nclusters = cluster_result.optimal_count
     else:
         assert False
-    cluster_labels = pd.Series(cluster_result.as_clustering(nclusters).membership, index=transformed_spectra.index)
+    cluster_labels = pd.Series(cluster_result.as_clustering(nclusters).membership, index=knn.vs['label']) #transformed_spectra.index
     print(f'Nclusters: {len(cluster_labels.unique())} ({cluster_result.optimal_count})')
 
     optimal_count = cluster_result.optimal_count 
