@@ -617,7 +617,7 @@ def clustering (matrixfile,
         if supercons:
             knn = knn.clusters().giant()
             selected=np.where(np.isin(transformed_spectra.index, knn.vs['label'], invert=False))[0]
-            factor_dists = factor_dists[selected][selected]
+            factor_dists = factor_dists[selected, :][:, selected]
        
         cluster_result = knn.community_walktrap(weights=knn.es['width'], steps=steps)
         print("KNN: number of vertices:", knn.vcount())
