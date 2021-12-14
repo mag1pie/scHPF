@@ -639,10 +639,10 @@ def clustering (matrixfile,
 
     # x = np.arange(-(optimal_count-10),20)
     # modularity = [cluster_result.as_clustering(max(optimal_count + i,10)).modularity for i in x]
-    x = range(optimal_count-5,optimal_count+6)
+    x = [int(i) for i in range(optimal_count-5,optimal_count+6)]
     modularity = [cluster_result.as_clustering(i).modularity for i in x]
     
-    plt.plot(x + optimal_count, modularity)
+    plt.plot(x, modularity)
     plt.axvline(nclusters, c='r')
     plt.ylabel('modularity')
     plt.xlabel('number of clusters')
