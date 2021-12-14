@@ -560,7 +560,8 @@ def clustering (matrixfile,
     print('Building a KNN graph')
     transformed_spectra = spectra[gene_ixs]
     factor_dists = 1 - pd.DataFrame(transformed_spectra, index=transformed_spectra.index).T.corr().values
-
+    factor_dists = np.clip(factor_dists,0,None)
+    
     local_neighborhood_size = 0.25  # just a heuristic for selecting k; 0.25
     n_neighbors = max(5, int(local_neighborhood_size * len(my_models)))
     local_density = get_local_density(factor_dists, n_neighbors, transformed_spectra.index)
